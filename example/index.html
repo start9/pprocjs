@@ -1,0 +1,11 @@
+<style>
+    html, body { margin: 0; padding: 0; }
+    canvas { display: block; }
+</style>
+
+<script src="https://jspm.io/system.js"></script>
+<script>System.baseURL = '../'; System.import( '~/example/test' ).then( function ( m ) {
+    return m.default( );
+} ).catch( function ( error ) {
+    console.error( error.stack || error );
+} )</script>
