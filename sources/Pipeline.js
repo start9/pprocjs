@@ -1,5 +1,7 @@
 import { EntryPass }              from './passes/EntryPass';
 import { ShaderPass }             from './passes/ShaderPass';
+import { Pass }                   from './passes/Pass';
+import { Shader }                 from './shaders/Shader';
 
 import { importPrivateGlBuffers } from './symbols';
 
@@ -23,103 +25,56 @@ function unlink( node ) {
 
 }
 
+function castToPass( element, gl ) {
+
+    if ( element instanceof Pass )
+        return element;
+
+    if ( element instanceof Shader )
+        return new ( element.PASS_TYPE )( gl, element );
+
+    throw new Error( 'This element cannot be casted to a valid pprocjs pass' );
+
+}
+
 export class Pipeline {
 
     constructor( gl ) {
 
         this._gl = gl;
-
-        this._passes = [ new EntryPass( this._gl ) ];
+        this._passes = [ ];
 
         importPrivateGlBuffers( gl );
 
-        Object.defineProperty( this, 'entry', {
-            get : ( ) => this._passes[ 0 ]
-        } );
-
-        Object.defineProperty( this, 'length', {
-            set : ( value ) => this.splice( value, this.length ),
-            get : ( ) => this._passes.length - 1
-        } );
+        this.entry = new EntryPass( this._gl );
 
     }
 
-    get( index ) {
+    createPass( element ) {
 
-        return this._passes[ index + 1 ];
+        return castToPass( element, this._gl );
 
     }
 
-    splice( offset, count, ... shaders ) {
+    applyShaders( elements ) {
 
-        if ( offset < 0 )
-            offset = 0;
-
-        if ( offset > this.length )
-            offset = this.length;
-
-        if ( count < 0 )
-            count = 0;
-
-        if ( offset + count > this.length )
-            count = this.length - offset;
-
-        let innerOffset = offset + 1;
-
-        let inserted = shaders.map( shader => new ( shader.PASS_TYPE )( this._gl, shader ) );
-        let removed = this._passes.splice( innerOffset, count, ... inserted );
-
-        for ( let t = 0, T = removed.length; t < T; ++ t )
-            unlink( removed[ t ] );
-
-        for ( let t = 0, T = inserted.length + 1; t < T; ++ t )
-            link( this._passes[ innerOffset + t - 1 ], this._passes[ innerOffset + t ] );
-
-        for ( let pass of removed ) {
-            pass.refreshOutput( );
-            pass.refreshInputs( );
+        for ( let t = 0; t < this._passes.length; t += 2 ) {
+            unlink( this._passes[ t ] );
+            this._passes[ t ].refreshInputs( );
+            this._passes[ t ].refreshOutput( );
         }
 
-        let previous = this._passes[ innerOffset - 1 ];
-        previous.refreshOutput( );
+        let passes = elements.map( element => this.createPass( element ) );
+        this._passes = [ this.entry ].concat( passes );
 
-        for ( let pass of inserted )
-            pass.refreshOutput( );
+        for ( let t = 0; t < this._passes.length; ++ t ) {
+            link( this._passes[ t ], this._passes[ t + 1 ] );
+            this._passes[ t ].refreshOutput( { cascade : false } );
+        }
 
-        for ( let t = innerOffset, T = this._passes.length; t < T; ++ t )
-            this._passes[ t ].refreshInputs( );
+        this.entry.refreshInputs( );
 
-        return removed.map( effect => {
-            return effect.shader;
-        } );
-
-    }
-
-    unshift( shader ) {
-
-        this.splice( 0, 0, shader );
-
-        return this.get( 0 );
-
-    }
-
-    push( shader ) {
-
-        this.splice( this.length, 0, shader );
-
-        return this.get( this.length - 1 );
-
-    }
-
-    shift( ) {
-
-        return this.splice( 0, 1 )[ 0 ];
-
-    }
-
-    pop( ) {
-
-        return this.splice( this.length - 1, 1 )[ 0 ];
+        return passes;
 
     }
 

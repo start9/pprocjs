@@ -1,10 +1,10 @@
 import { Output }                           from '../structs/Output';
-import { Pass }                             from '../structs/Pass';
-
 import { createFramebuffer, createTexture } from '../helpers';
 import { vertexPositionBufferSymbol }       from '../symbols';
 import { vertexTextureUvBufferSymbol }      from '../symbols';
 import { vertexIndexBufferSymbol }          from '../symbols';
+
+import { Pass }                             from './Pass';
 
 export class ShaderPass extends Pass {
 
@@ -50,7 +50,7 @@ export class ShaderPass extends Pass {
 
     }
 
-    refreshOutput( ) {
+    refreshOutput( { cascade = true } = { } ) {
 
         if ( this.next && ! this.output.texture ) {
 
@@ -67,8 +67,6 @@ export class ShaderPass extends Pass {
             this.gl.framebufferTexture2D( this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, this.output.texture, 0 );
             this.gl.bindFramebuffer( this.gl.FRAMEBUFFER, null );
 
-            this.next.refreshInputs( );
-
         } else if ( ! this.next && this.output.texture ) {
 
             this.gl.deleteFramebuffer( this.output.framebuffer );
@@ -79,9 +77,13 @@ export class ShaderPass extends Pass {
 
         }
 
+        if ( this.next && cascade ) {
+            this.next.refreshInputs( );
+        }
+
     }
 
-    refreshInputs( ) {
+    refreshInputs( { cascade = true } = { } ) {
 
         this.gl.useProgram( this.program );
 
@@ -103,6 +105,10 @@ export class ShaderPass extends Pass {
         }
 
         this.gl.useProgram( null );
+
+        if ( this.next && cascade ) {
+            this.next.refreshInputs( );
+        }
 
     }
 

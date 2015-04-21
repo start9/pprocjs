@@ -7,32 +7,38 @@ This library should be modulable enough to be used in any type of WebGL applicat
 ## Example
 
 ```js
-let canvas = document.createElement( 'canvas' );
+let screen = new VirtjsScreen( );
+document.body.appendChild( screen.canvas );
 
-canvas.width = document.body.clientWidth;
-canvas.height = document.body.clientHeight;
-document.body.appendChild( canvas );
+screen.setInputFormat( {
+    depth : 32,
+    rMask : 0x00FF0000,
+    gMask : 0x0000FF00,
+    bMask : 0x000000FF,
+    aMask : 0xFF000000
+} );
 
-let gl = canvas.getContext( 'webgl' );
+screen.setInputSize(
+    image.width,
+    image.height
+);
 
-gl.clearColor( 0.0, 0.0, 0.0, 1.0 );
-gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, true );
+screen.setOutputSize(
+    document.body.clientWidth,
+    document.body.clientHeight
+);
 
-let pipeline = new Pipeline( gl );
-pipeline.entry.setInputSize( image.width, image.height );
-pipeline.entry.setInputData( gl.RGBA, gl.UNSIGNED_BYTE, image.data );
+screen.setInputData( image.data );
 
-pipeline.push( new XbrLv3Shader( ) );
-
-let containmentPass = pipeline.push( new ContainmentShader( ) );
-containmentPass.setOutputSize( canvas.width, canvas.height );
-
-pipeline.push( new CrtLottesShader( ) );
+var [ xbrPass, containmentPass, crtLottesPass ] = screen.applyShaders( [
+    new XbrLv3Shader( ),
+    new CrtLottesShader( ),
+    screen.containmentPass,
+] );
 
 ( function render( ) {
     requestAnimationFrame( render );
-    gl.clear( gl.COLOR_BUFFER_BIT );
-    pipeline.render( );
+    screen.flushScreen( );
 } )( );
 ```
 

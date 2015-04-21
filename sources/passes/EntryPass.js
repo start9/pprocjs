@@ -1,7 +1,7 @@
 import { Output }        from '../structs/Output';
-import { Pass }          from '../structs/Pass';
-
 import { createTexture } from '../helpers';
+
+import { Pass }          from './Pass';
 
 export class EntryPass extends Pass {
 
@@ -23,6 +23,8 @@ export class EntryPass extends Pass {
 
         this.setInputData( this.gl.RGBA, this.gl.UNSIGNED_BYTE, null );
 
+        this.next && this.next.refreshInputs( );
+
     }
 
     setInputData( format, type, data ) {
@@ -33,7 +35,19 @@ export class EntryPass extends Pass {
 
     }
 
-    refreshOutput( ) {
+    refreshOutput( { cascade = true } = { } ) {
+
+        if ( this.next && cascade ) {
+            this.next.refreshInputs( );
+        }
+
+    }
+
+    refreshInputs( { cascade = true } = { } ) {
+
+        if ( this.next && cascade ) {
+            this.next.refreshInputs( );
+        }
 
     }
 

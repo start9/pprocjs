@@ -27,17 +27,33 @@ export class ContainmentPass extends ShaderPass {
 
     }
 
-    refreshInputs( ) {
+    refreshInputs( { cascade = true } = { } ) {
 
-        super.refreshInputs( );
+        super.refreshInputs( { cascade : false } );
 
-        var inputWidth = this.inputs.length > 0 ? this.inputs[ 0 ].resolution.width : 0;
-        var inputHeight = this.inputs.length > 0 ? this.inputs[ 0 ].resolution.height : 0;
+        this._refreshMatrix( );
 
-        var outputWidth = this.output.resolution.width;
-        var outputHeight = this.output.resolution.height;
+        if ( this.next && cascade ) {
+            this.next.refreshInputs( );
+        }
 
-        var isUndefined = value => value == null || value === '';
+    }
+
+    getResolution( ) {
+
+        return { width : this.outputWidth, height : this.outputHeight };
+
+    }
+
+    _refreshMatrix( ) {
+
+        let inputWidth = this.inputs.length > 0 ? this.inputs[ 0 ].resolution.width : 0;
+        let inputHeight = this.inputs.length > 0 ? this.inputs[ 0 ].resolution.height : 0;
+
+        let outputWidth = this.output.resolution.width;
+        let outputHeight = this.output.resolution.height;
+
+        let isUndefined = value => value == null || value === '';
 
         if ( isUndefined( outputWidth ) && isUndefined( outputHeight ) )
             outputWidth = inputWidth, outputHeight = inputHeight;
@@ -48,25 +64,19 @@ export class ContainmentPass extends ShaderPass {
         if ( isUndefined( outputHeight ) )
             outputHeight = inputHeight * ( outputWidth / inputWidth );
 
-        var widthRatio = outputWidth / inputWidth;
-        var heightRatio = outputHeight / inputHeight;
+        let widthRatio = outputWidth / inputWidth;
+        let heightRatio = outputHeight / inputHeight;
 
-        var ratio = Math.min( widthRatio, heightRatio );
+        let ratio = Math.min( widthRatio, heightRatio );
 
-        var viewportWidth = widthRatio / ratio;
-        var viewportHeight = heightRatio / ratio;
+        let viewportWidth = widthRatio / ratio;
+        let viewportHeight = heightRatio / ratio;
 
-        var matrix = createOrthoMatrix( - viewportWidth, viewportWidth, - viewportHeight, viewportHeight, - 100, 100 );
+        let matrix = createOrthoMatrix( - viewportWidth, viewportWidth, - viewportHeight, viewportHeight, - 100, 100 );
 
         this.gl.useProgram( this.program );
         this.gl.uniformMatrix4fv( this.uMatrixLocation, false, matrix );
         this.gl.useProgram( null );
-
-    }
-
-    getResolution( ) {
-
-        return { width : this.outputWidth, height : this.outputHeight };
 
     }
 
