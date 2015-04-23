@@ -60,7 +60,7 @@ export class ShaderPass extends Pass {
             this.output.texture = createTexture( this.gl );
 
             this.gl.bindTexture( this.gl.TEXTURE_2D, this.output.texture );
-            this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.gl.RGBA, width, height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, null );
+            this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.gl.RGB, width, height, 0, this.gl.RGB, this.gl.UNSIGNED_BYTE, null );
             this.gl.bindTexture( this.gl.TEXTURE_2D, null );
 
             this.gl.bindFramebuffer( this.gl.FRAMEBUFFER, this.output.framebuffer );
@@ -95,7 +95,7 @@ export class ShaderPass extends Pass {
 
         if ( this.output.texture ) {
             this.gl.bindTexture( this.gl.TEXTURE_2D, this.output.texture );
-            this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.gl.RGBA, width, height, 0, this.gl.RGBA, this.gl.UNSIGNED_BYTE, null );
+            this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.gl.RGB, width, height, 0, this.gl.RGB, this.gl.UNSIGNED_BYTE, null );
             this.gl.bindTexture( this.gl.TEXTURE_2D, null );
         }
 

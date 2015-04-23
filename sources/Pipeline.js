@@ -20,8 +20,15 @@ function link( from, to ) {
 
 function unlink( node ) {
 
-    node.previous.next = null;
-    node.previous = null;
+    if ( node.previous ) {
+        node.previous.next = null;
+        node.previous = null;
+    }
+
+    if ( node.next ) {
+        node.next.previous = null;
+        node.next = null;
+    }
 
 }
 

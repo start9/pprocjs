@@ -131,7 +131,7 @@ export class VirtjsScreen {
 
         this.gl.clear( this.gl.COLOR_BUFFER_BIT );
 
-        this.pipeline.entry.setInputData( format, type, this.inputData );
+        this.pipeline.entry.setInputData( format, type, this._getAlignedData( ) );
         this.pipeline.render( );
 
     }
