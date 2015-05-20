@@ -30,7 +30,7 @@ export class EntryPass extends Pass {
     setInputData( format, type, data ) {
 
         this.gl.bindTexture( this.gl.TEXTURE_2D, this.output.texture );
-        this.gl.texImage2D( this.gl.TEXTURE_2D, 0, this.gl.RGB, this.output.resolution.width, this.output.resolution.height, 0, format, type, data );
+        this.gl.texImage2D( this.gl.TEXTURE_2D, 0, format, this.output.resolution.width, this.output.resolution.height, 0, format, type, data );
         this.gl.bindTexture( this.gl.TEXTURE_2D, null );
 
     }

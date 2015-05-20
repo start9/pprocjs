@@ -26,12 +26,13 @@ function run( image ) {
         document.body.clientHeight
     );
 
+
     screen.setInputData( image.data );
 
     var [ xbrPass, containmentPass, crtLottesPass ] = screen.applyShaders( [
         new XbrLv3Shader( ),
-        new CrtLottesShader( ),
         screen.containmentPass,
+        new CrtLottesShader( )
     ] );
 
     ( function render( ) {

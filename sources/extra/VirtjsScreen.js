@@ -3,11 +3,11 @@ import { Pipeline }          from '../Pipeline';
 
 let gWebGlSupportedInputFormats = [
 
-    { depth : 16, rMask : 0b1111100000000000, gMask : 0b0000011111100000, bMask : 0b0000000000011111, aMask : 0b0000000000000000, _typedView : Uint16Array,
-      /* The following is private and shouldn't be used anywhere else */ _format : 'RGB', _type : 'UNSIGNED_SHORT_5_6_5' },
+    { depth : 16, rMask : 0b1111100000000000, gMask : 0b0000011111100000, bMask : 0b0000000000011111, aMask : 0b0000000000000000,
+      /* The following is private and shouldn't be used anywhere else */ _typedView : Uint16Array, _format : 'RGB', _type : 'UNSIGNED_SHORT_5_6_5' },
 
-    { depth : 32, rMask : 0x00FF0000, gMask : 0x0000FF00, bMask : 0x000000FF, aMask : 0xFF000000, _typedView : Uint32Array,
-      /* The following is private and shouldn't be used anywhere else */ _format : 'RGBA', _type : 'UNSIGNED_BYTE' }
+    { depth : 32, rMask : 0x00FF0000, gMask : 0x0000FF00, bMask : 0x000000FF, aMask : 0xFF000000,
+      /* The following is private and shouldn't be used anywhere else */ _typedView : Uint8Array, _format : 'RGBA', _type : 'UNSIGNED_BYTE' }
 
 ];
 
@@ -52,7 +52,7 @@ export class VirtjsScreen {
 
     }
 
-    setInputSize( width, height, pitch = width ) {
+    setInputSize( width, height, pitch = null ) {
 
         if ( width === this.inputWidth && height === this.inputHeight && pitch === this.inputPitch )
             return ;
@@ -141,10 +141,15 @@ export class VirtjsScreen {
         if ( ! this.inputFormat )
             return ;
 
-        if ( this.inputPitch === this.inputWidth * this.inputFormat.depth / 8 ) {
+        if ( this.inputPitch === null || this.inputPitch === this.inputWidth * this.inputFormat.depth / 8 ) {
+
             this._alignedData = null;
+
         } else {
-            this._alignedData = new this.inputFormat._typedView( this.inputWidth * this.inputHeight );
+
+            let sizeFactor = ( this.inputFormat.depth / 8 ) / this.inputFormat._typedView.BYTES_PER_ELEMENT;
+            this._alignedData = new this.inputFormat._typedView( this.inputWidth * this.inputHeight * sizeFactor );
+
         }
 
     }
